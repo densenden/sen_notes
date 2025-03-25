@@ -7,8 +7,11 @@ const rl = readline.createInterface({
     output: process.stdout
 });
 
-// Create pasta notes array
-let pastaNotes = [
+// File path for storing notes
+const NOTES_FILE = 'notes.json';
+
+// Default pasta notes
+const DEFAULT_NOTES = [
     {
         title: 'Shopping Time!',
         body: 'Get Tipo 00 flour, 5 organic eggs, Parmigiano Reggiano, Pecorino Romano, Guanciale, fresh basil, and the fanciest olive oil you can find!',
@@ -61,6 +64,25 @@ let pastaNotes = [
     }
 ];
 
+// Function to load notes from file
+function loadNotes() {
+    try {
+        const data = fs.readFileSync(NOTES_FILE, 'utf8');
+        const notes = JSON.parse(data);
+        return notes.length > 0 ? notes : DEFAULT_NOTES;
+    } catch (error) {
+        return DEFAULT_NOTES;
+    }
+}
+
+// Function to save notes to file
+function saveNotes(notes) {
+    fs.writeFileSync(NOTES_FILE, JSON.stringify(notes, null, 2));
+}
+
+// Load initial notes
+let pastaNotes = loadNotes();
+
 // Function to display menu
 function displayMenu() {
     console.log('\n=== Pasta Notes App ===');
@@ -83,6 +105,7 @@ function addNote() {
                 time_added: new Date().toISOString()
             };
             pastaNotes.push(note);
+            saveNotes(pastaNotes);
             console.log('Note added successfully!');
             startApp();
         });
@@ -93,7 +116,9 @@ function addNote() {
 function listNotes() {
     console.log('\n=== All Notes ===');
     pastaNotes.forEach((note, index) => {
-        console.log(`${index + 1}. ${note.title}`);
+        console.log(`${index + 1}. Title: ${note.title}`);
+        console.log(`   Body: ${note.body}`);
+        console.log(`   Added on: ${note.time_added}\n`);
     });
     console.log('================\n');
     startApp();
@@ -101,17 +126,16 @@ function listNotes() {
 
 // Function to read a specific note
 function readNote() {
-    rl.question('Enter note number to read: ', (number) => {
-        const index = parseInt(number) - 1;
-        if (index >= 0 && index < pastaNotes.length) {
-            const note = pastaNotes[index];
+    rl.question('Enter note title: ', (title) => {
+        const note = pastaNotes.find(n => n.title === title);
+        if (note) {
             console.log('\n=== Note Details ===');
             console.log(`Title: ${note.title}`);
             console.log(`Body: ${note.body}`);
-            console.log(`Added: ${note.time_added}`);
+            console.log(`Added on: ${note.time_added}`);
             console.log('==================\n');
         } else {
-            console.log('Invalid note number!');
+            console.log('Note not found!');
         }
         startApp();
     });
@@ -119,13 +143,14 @@ function readNote() {
 
 // Function to delete a note
 function deleteNote() {
-    rl.question('Enter note number to delete: ', (number) => {
-        const index = parseInt(number) - 1;
-        if (index >= 0 && index < pastaNotes.length) {
+    rl.question('Enter note title: ', (title) => {
+        const index = pastaNotes.findIndex(n => n.title === title);
+        if (index !== -1) {
             pastaNotes.splice(index, 1);
+            saveNotes(pastaNotes);
             console.log('Note deleted successfully!');
         } else {
-            console.log('Invalid note number!');
+            console.log('Note not found!');
         }
         startApp();
     });
@@ -133,19 +158,17 @@ function deleteNote() {
 
 // Function to update a note
 function updateNote() {
-    rl.question('Enter note number to update: ', (number) => {
-        const index = parseInt(number) - 1;
-        if (index >= 0 && index < pastaNotes.length) {
-            rl.question('Enter new title (or press Enter to keep current): ', (title) => {
-                rl.question('Enter new body (or press Enter to keep current): ', (body) => {
-                    if (title) pastaNotes[index].title = title;
-                    if (body) pastaNotes[index].body = body;
-                    console.log('Note updated successfully!');
-                    startApp();
-                });
+    rl.question('Enter note title: ', (title) => {
+        const index = pastaNotes.findIndex(n => n.title === title);
+        if (index !== -1) {
+            rl.question('Enter new note body: ', (body) => {
+                pastaNotes[index].body = body;
+                saveNotes(pastaNotes);
+                console.log('Note updated successfully!');
+                startApp();
             });
         } else {
-            console.log('Invalid note number!');
+            console.log('Note not found!');
             startApp();
         }
     });
