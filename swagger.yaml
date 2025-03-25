@@ -1,0 +1,127 @@
+openapi: 3.0.0
+info:
+  title: Pasta Notes API
+  description: A RESTful API for managing cooking notes, specifically for Italian pasta recipes
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /notes:
+    get:
+      summary: Returns all notes
+      responses:
+        '200':
+          description: A list of notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Note'
+    post:
+      summary: Creates a new note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - body
+              properties:
+                title:
+                  type: string
+                body:
+                  type: string
+      responses:
+        '201':
+          description: Note created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '400':
+          description: Invalid input
+        '409':
+          description: Note with this title already exists
+
+  /notes/{title}:
+    parameters:
+      - name: title
+        in: path
+        required: true
+        schema:
+          type: string
+        description: The title of the note
+    get:
+      summary: Returns a specific note
+      responses:
+        '200':
+          description: The requested note
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '404':
+          description: Note not found
+    put:
+      summary: Updates a note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - body
+              properties:
+                body:
+                  type: string
+      responses:
+        '200':
+          description: Note updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Note'
+        '400':
+          description: Invalid input
+        '404':
+          description: Note not found
+    delete:
+      summary: Deletes a note
+      responses:
+        '200':
+          description: Note deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '404':
+          description: Note not found
+
+components:
+  schemas:
+    Note:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Shopping Time!"
+        body:
+          type: string
+          example: "Get Tipo 00 flour, 5 organic eggs..."
+        time_added:
+          type: string
+          format: date-time
+          example: "2024-03-25T10:00:00Z"
+      required:
+        - title
+        - body
+        - time_added 
