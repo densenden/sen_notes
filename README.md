@@ -2,6 +2,9 @@
 
 A RESTful API for managing cooking notes, specifically designed for creating the perfect Italian pasta dish. Built with Node.js and Express.
 
+<img width="1000" alt="screenshot browser access" src="https://github.com/user-attachments/assets/ef7c7fa2-1a97-46e8-8396-4d22e6e43931" />
+
+
 ## Features 🌟
 
 - Create, read, update, and delete notes
